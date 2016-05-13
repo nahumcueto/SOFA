@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE scn>
+<Node name="root" dt="0.05">
+	<!--- @VisualStyle: atributos sobre qué modelos se van a visualizar. -->
+	<VisualStyle name="visualStyle1" displayFlags="showVisual showForceFields" />
+	<!--- @DefaultPipeline: Fuente de información por defecto sobre la detección 
+		de colisiones y el modelado. -->
+	<DefaultPipeline name="DefaultCollisionPipeline"
+		verbose="0" draw="0" depth="6" />
+	<!--- @BruteForceDetection: detección de colisiones mediante pruebas por 
+		pares (por cada par de elementos colisionables se hace una prueba continuamente) -->
+	<BruteForceDetection name="Detection" />
+	<!--- @MinProximityIntersection: Conjunto de métodos que deciden si dos 
+		elementos colisionables (primitivas) están lo suficientemente cerca para 
+		chocar. -->
+	<MinProximityIntersection name="Proximity"
+		alarmDistance="3" contactDistance="2" />
+	<!--- @DefaultContactManager: Crea las reacciones que producen los choques. -->
+	<DefaultContactManager name="Response" response="default" />
+
+	<!--- Nodo que contiene el primero de los dos dragones que vana colisionar. -->
+	<Node name="Dragon1">
+		<!--- @EulerImplicitSolver : This solver contains the algorithm used to 
+			update particle positions and velocities at each time step. It uses an auxiliary 
+			component, the @CGLinearSolver, to solve equation systems. -->
+		<EulerImplicitSolver name="Implicit Euler Solver_dr2" />
+		<CGLinearSolver template="GraphScattered" name="Conjugate Gradient_dr2"
+			iterations="25" tolerance="1e-05" threshold="1e-05" />
+		<!--- @Gravity: asigna una gravedad (en la dirección y sentido indicados) 
+			al nodo. -->
+		<Gravity name="gravity_dr1" gravity="0 0 -9.81" />
+		<!--- @SparseGridTopology: "cuadrícula" o "rejilla" tridimensional que 
+			se ajusta lo mejor posible al objeto tridimensional con la resolución establecida. 
+			En este caso, intentará ajustarse al dragón tridimensional definido en el 
+			archivo dragon.obj con una resulución de 14x12x10 partículas. -->
+		<SparseGridTopology name="Embedded Sparse Grid_dr1"
+			fileTopology="/home/nahum/Escritorio/sofa/v15.12/src/share/mesh/dragon.obj"
+			n="14 12 10" />
+		<!--- @MechanicalObject: Describe los estados -vectores- mecánicos del 
+			nodo. -->
+		<MechanicalObject template="Vec3d"
+			name="Dragon_objetoMecanico_dr1" position="0 0 0" velocity="0 0 0"
+			force="0 0 0" externalForce="0 0 0" restScale="1" />
+		<!--- @UniformMass : le da la misma masa a todas las partículas del MechanicalObject. -->
+		<UniformMass template="Vec3d" name="Mass_dr1" />
+		<!--- @HexahedronFEMForceField: Campos de fuerza hexaédricos (poliedros 
+			de seis caras, no necesariamente serán cubos los hexaedros) entre las partículas 
+			que haya en la topología. -->
+		<HexahedronFEMForceField template="Vec3d"
+			name="FEM_dr1" poissonRatio="0.45" youngModulus="100" gatherPt=" "
+			gatherBsize=" " />
+
+		<!--- Representación visual del dragón. -->
+		<Node name="VisualNode_dr1">
+			<!--- @OglModel: Generic visual model for OpenGL display. -->
+			<OglModel template="ExtVec3d" name="Modelo_dragon_dr1"
+				fileMesh="/home/nahum/Escritorio/sofa/v15.12/src/share/mesh/dragon.obj"
+				primitiveType="DEFAULT" blendEquation="GL_FUNC_ADD" sfactor="GL_SRC_ALPHA"
+				dfactor="GL_ONE_MINUS_SRC_ALPHA" />
+			<!--- @BarycentricMapping: mapeo baricéntrico; hace que dos modelos se 
+				correspondan entre sí, para que los cambios en el estado mecánico se reflejen 
+				en el visual, por ejemplo. -->
+			<BarycentricMapping template="Vec3d,ExtVec3d"
+				name="Visual Mapping_dr1" input="@../" output="@Modelo_dragon_dr1" />
+		</Node>
+		<!--- Contiene los detalles sobre cómo el dragón colisionará y reaccionará 
+			a las colisiones. -->
+		<Node name="CollisionNode_dr1">
+			<!--- @MeshTopology: Topología en malla. Muchísimo más precisa que la 
+				rejilla dispersa (SparseGridTopology). -->
+			<MeshTopology name="Mesh_dr1"
+				fileTopology="/home/nahum/Escritorio/sofa/v15.12/src/share/mesh/dragon.obj" />
+			<MechanicalObject template="Vec3d" name="CollisionObject_dr1"
+				position="0 0 0" velocity="0 0 0" force="0 0 0" externalForce="0 0 0"
+				restScale="1" scale3d="1 1 1" />
+			<!--- Mediante puntos (@TPointModel), líneas (@TLineModel) y triángulos 
+				(@TTriangleModel) crea un modelo de colisiones que se ajuste a la topología. -->
+			<TPointModel template="Vec3d" name="Points_dr1" />
+			<TLineModel template="Vec3d" name="Lines_dr1" />
+			<TTriangleModel template="Vec3d" name="Triangles_dr1" />
+			<!--- @BarycentricMapping: Mantiene sincronizados el modelo de colisiones 
+				y el modelo "mecánico". -->
+			<BarycentricMapping template="Vec3d,Vec3d"
+				name="MechanicalMapping_dr1" input="@../" output="@./" />
+		</Node>
+	</Node>
+
+	<!--- -->
+	<Node name="Dragon2" translation="0 0 -50">
+		<!--- @EulerImplicitSolver : This solver contains the algorithm used to 
+			update particle positions and velocities at each time step. It uses an auxiliary 
+			component, the @CGLinearSolver, to solve equation systems. -->
+		<EulerImplicitSolver name="Implicit Euler Solver_dr2" />
+		<CGLinearSolver template="GraphScattered" name="Conjugate Gradient_dr2"
+			iterations="25" tolerance="1e-05" threshold="1e-05" />
+		<!--- @Gravity: asigna una gravedad (en la dirección y sentido indicados) 
+			al nodo. -->
+		<Gravity name="gravity_dr2" gravity="0 0 9.81" />
+		<!--- @SparseGridTopology: "cuadrícula" o "rejilla" tridimensional que 
+			se ajusta lo mejor posible al objeto tridimensional con la resolución establecida. 
+			En este caso, intentará ajustarse al dragón tridimensional definido en el 
+			archivo dragon.obj con una resulución de 14x12x10 partículas. -->
+		<SparseGridTopology name="Embedded Sparse Grid_dr2"
+			fileTopology="/home/nahum/Escritorio/sofa/v15.12/src/share/mesh/dragon.obj"
+			n="14 12 10" />
+		<!--- @MechanicalObject: Describe los estados -vectores- mecánicos del 
+			nodo. -->
+		<MechanicalObject template="Vec3d"
+			name="Dragon_objetoMecanico_dr2" position="0 0 0" velocity="0 0 0"
+			force="0 0 0" externalForce="0 0 0" restScale="1" translation="0 0 -50" />
+		<!--- @UniformMass : le da la misma masa a todas las partículas del MechanicalObject. -->
+		<UniformMass template="Vec3d" name="Mass_dr2" />
+		<!--- @HexahedronFEMForceField: Campos de fuerza hexaédricos (poliedros 
+			de seis caras, no necesariamente serán cubos los hexaedros) entre las partículas 
+			que haya en la topología. -->
+		<HexahedronFEMForceField template="Vec3d"
+			name="FEM_dr2" poissonRatio="0.45" youngModulus="100" gatherPt=" "
+			gatherBsize=" " />
+		<!--- Representación visual del dragón. -->
+		<Node name="VisualNode_dr2">
+			<!--- @OglModel: Generic visual model for OpenGL display. -->
+			<OglModel template="ExtVec3d" name="Modelo_dragon_dr2"
+				fileMesh="/home/nahum/Escritorio/sofa/v15.12/src/share/mesh/dragon.obj"
+				primitiveType="DEFAULT" blendEquation="GL_FUNC_ADD" sfactor="GL_SRC_ALPHA"
+				dfactor="GL_ONE_MINUS_SRC_ALPHA" />
+			<!--- @BarycentricMapping: mapeo baricéntrico; hace que dos modelos se 
+				correspondan entre sí, para que los cambios en el estado mecánico se reflejen 
+				en el visual, por ejemplo. -->
+			<BarycentricMapping template="Vec3d,ExtVec3d"
+				name="Visual Mapping_dr2" input="@../" output="@Modelo_dragon_dr2" />
+		</Node>
+		<!--- Contiene los detalles sobre cómo el dragón colisionará y reaccionará 
+			a las colisiones. -->
+		<Node name="CollisionNode_dr2">
+			<!--- @MeshTopology: Topología en malla. Muchísimo más precisa que la 
+				rejilla dispersa (SparseGridTopology). -->
+			<MeshTopology name="Mesh_dr2"
+				fileTopology="/home/nahum/Escritorio/sofa/v15.12/src/share/mesh/dragon.obj" />
+			<!--- @MechanicalObject: Describe los estados -vectores- mecánicos del 
+				nodo. -->
+			<MechanicalObject template="Vec3d" name="CollisionObject_dr2"
+				position="0 0 0" velocity="0 0 0" force="0 0 0" externalForce="0 0 0"
+				restScale="1" />
+			<!--- Mediante puntos (@TPointModel), líneas (@TLineModel) y triángulos 
+				(@TTriangleModel) crea un modelo de colisiones que se ajuste a la topología. -->
+			<TPointModel template="Vec3d" name="Points_dr2" />
+			<TLineModel template="Vec3d" name="Lines_dr2" />
+			<TTriangleModel template="Vec3d" name="Triangles_dr2" />
+			<!--- @BarycentricMapping: Mantiene sincronizados el modelo de colisiones 
+				y el modelo "mecánico". -->
+			<BarycentricMapping template="Vec3d,Vec3d"
+				name="MechanicalMapping_dr2" input="@../" output="@./" />
+		</Node>
+	</Node>
+
+</Node>

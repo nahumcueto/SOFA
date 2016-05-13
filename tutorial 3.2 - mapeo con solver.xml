@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE scn>
+<Node name="root" gravity="0 -9.81 0" dt="0.01">
+	<!--- @VisualStyle: parámetros de visualización. -->
+	<VisualStyle name="visualStyle1" displayFlags="showBehavior" />
+	<!--- @DefaultPipeline: Fuente de información por defecto sobre la detección 
+		de colisiones y el modelado. -->
+	<DefaultPipeline name="DefaultCollisionPipeline"
+		verbose="0" draw="0" depth="6" />
+	<!--- @BruteForceDetection: detección de colisiones mediante pruebas por 
+		pares (por cada par de elementos colisionables se hace una prueba continuamente) 
+		-->
+	<BruteForceDetection name="Detection" />
+	<!--- @MinProximityIntersection: Conjunto de métodos que deciden si dos 
+		elementos colisionables (primitivas) están lo suficientemente cerca para 
+		chocar. -->
+	<MinProximityIntersection name="Proximity"
+		alarmDistance="3" contactDistance="2" />
+	<!--- @DefaultContactManager: Gestor de las reacciones que se producen en 
+		respuesta a los choques. -->
+	<DefaultContactManager name="Response" response="default" />
+	<Node name="Tetrahedrons Mesh">
+		<!--- @MeshGmshLoader: Cargador de mallas en formato "Gmsh". -->
+		<MeshGmshLoader name="loader" filename="mesh/cylinder.msh"
+			tetrahedraGroups="  -1 0 2430" />
+		<!--- @MechanicalObject: Describe los estados -vectores- mecánicos del 
+			nodo. -->
+		<MechanicalObject template="Vec3d" name="Volume"
+			position="@loader.position" velocity="0 0 0" force="0 0 0"
+			externalForce="0 0 0" restScale="1" />
+		<!--- @EulerImplicitSolver : This solver contains the algorithm used to 
+			update particle positions and velocities at each time step. It uses an auxiliary 
+			component, the @CGLinearSolver, to solve equation systems. -->
+		<EulerImplicitSolver name="cg_odesolver" printLog="0" />
+		<CGLinearSolver template="GraphScattered" name="linear solver"
+			iterations="25" tolerance="1e-09" threshold="1e-09" />
+		<!--- @TetrahedronSetTopologyContainer: Contenedor de la topología en malla 
+			dinámica de tetraedros (se pueden deformar en tiempo de ejecución) - Cuando 
+			no se cargue la topología con un MeshTopology será necesrio definir SetTopologyContainer, 
+			SetTopologyModifier, SetTopologyAlgorithms, SetGeometryAlgorithms... -->
+		<TetrahedronSetTopologyContainer name="Container"
+			fileTopology="mesh/cylinder.msh" tetrahedra="@loader.tetrahedra" />
+		<TetrahedronSetTopologyModifier name="Modifier" />
+		<TetrahedronSetTopologyAlgorithms
+			template="Vec3d" name="TopoAlgo" />
+		<!--- @TetrahedronSetGeometryAlgorithms: @param drawTetrahedra: Dibuja 
+			los tetraedros. @param drawColorTetrahedra: Color con el que se pintan los 
+			tetraedros. -->
+		<TetrahedronSetGeometryAlgorithms
+			template="Vec3d" name="GeomAlgo" drawTetrahedra="1"
+			drawColorTetrahedra="1 1 0.3" />
+		<!--- @TetrahedralCorotationalFEMForceField: Campo de fuerza FEM (Finite 
+			Element Method (método para resolver las derivadas parciales dividiendo el 
+			elemento el 'trozos' finitos)) co-rotacional. -->
+		<TetrahedralCorotationalFEMForceField
+			template="Vec3d" name="FEM" method="large" poissonRatio="0.3"
+			youngModulus="360" computeGlobalMatrix="0" />
+		<!--- @DiagonalMass: Define la masa del cuerpo como una matriz diagonal. 
+			-->
+		<DiagonalMass template="Vec3d" name="default11"
+			massDensity="2" />
+		<!--- @FixedConstraint: De los puntos fijos de @FixedPlaneConstraint define 
+			el que se fije en índice (@param indices) como punto fijo en el espacio. 
+			-->
+		<FixedPlaneConstraint template="Vec3d" name="default12"
+			direction="0 0 1" dmin="-0.1" dmax="0.1" />
+		<FixedConstraint template="Vec3d" name="default13"
+			indices="0" />
+	</Node>
+</Node>

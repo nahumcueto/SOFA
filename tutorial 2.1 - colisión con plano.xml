@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE scn>
+<Node name="root" gravity="0 0 -9.81" dt="0.02">
+	<!--- @VisualStyle: atributos sobre qué modelos se van a visualizar. -->
+	<VisualStyle name="visualStyle1" displayFlags="showAll" />
+	<Node name="Objeto">
+		<!--- @EulerImplicitSolver : This solver contains the algorithm used to 
+			update particle positions and velocities at each time step. It uses an auxiliary 
+			component, the @CGLinearSolver, to solve equation systems. -->
+		<EulerImplicitSolver name="Implicit Euler Solver" />
+		<CGLinearSolver template="GraphScattered" name="Conjugate Gradient"
+			iterations="25" tolerance="1e-05" threshold="1e-05" />
+		<!--- @MechanicalObject: Describe los estados -vectores- mecánicos del 
+			nodo. -->
+		<MechanicalObject template="Vec3f" name="Particle"
+			position="0 0 0" velocity="0 0 0" force="0 0 0" externalForce="0 0 0"
+			restScale="1" />
+		<!--- @UniformMass : le da la misma masa a todas las partículas del MechanicalObject. 
+			-->
+		<UniformMass template="Vec3f" name="Mass" />
+		<PlaneForceField template="Vec3f" name="planeFF1"
+			normal="0 0 1" d="-20" draw="1" />
+		<!--- @HexahedronFEMForceField: Campos de fuerza hexaédricos (poliedros 
+			de seis caras, no necesariamente serán cubos los hexaedros) entre las partículas 
+			que haya en la topología. -->
+		<HexahedronFEMForceField template="Vec3f"
+			gatherPt=" " gatherBsize=" " youngModulus="500" />
+		<!--- @SparseGridTopology: "cuadrícula" o "rejilla" tridimensional que 
+			se ajusta lo mejor posible al objeto tridimensional con la resolución establecida. 
+			En este caso, intentará ajustarse al dragón tridimensional definido en el 
+			archivo dragon.obj con una resulución de 14x12x10 partículas. -->
+		<SparseGridTopology name="sparseGridTopology2"
+			fileTopology="/home/nahum/Escritorio/sofa/v15.12/src/share/mesh/dragon.obj"
+			n="14 18 15" />
+		<Node name="NodoVisual">
+			<!--- @OglModel: Generic visual model for OpenGL display. -->
+			<OglModel template="ExtVec3f" name="objetivo"
+				fileMesh="/home/nahum/Escritorio/sofa/v15.12/src/share/mesh/dragon.obj"
+				material="Default Diffuse 1 0.74902 0.74902 0.74902 1 Ambient 1 0.2 0.2 0.2 1 Specular 0 1 1 1 1 Emissive 0 0 0 0 0 Shininess 0 45 "
+				primitiveType="DEFAULT" blendEquation="GL_FUNC_ADD" sfactor="GL_SRC_ALPHA"
+				dfactor="GL_ONE_MINUS_SRC_ALPHA" />
+			<!--- @BarycentricMapping: mapeo baricéntrico; hace que dos modelos se 
+				correspondan entre sí, para que los cambios en el estado mecánico se reflejen 
+				en el visual, por ejemplo. -->
+			<BarycentricMapping template="Vec3f,ExtVec3f" />
+		</Node>
+	</Node>
+</Node>

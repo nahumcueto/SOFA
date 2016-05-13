@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE scn>
+<Node name="root" gravity="0 -9.81 0" dt="0.01">
+	<!--- @EulerImplicitSolver : This solver contains the algorithm used to 
+		update particle positions and velocities at each time step. It uses an auxiliary 
+		component, the @CGLinearSolver, to solve equation systems. -->
+	<EulerImplicitSolver name="Implicit Euler Solver" />
+	<CGLinearSolver template="GraphScattered" name="Conjugate Gradient"
+		iterations="25" tolerance="1e-05" threshold="1e-05" />
+	<VisualStyle name="visualStyle1" displayFlags="showBehavior" />
+	<!--- @Node : este primer nodo contiene tres partículas. Dos de ellas serán 
+		afectadas por la gravedad y la otra no. -->
+	<Node name="FirstObject">
+		<!--- @MechanicalObject : conjunto de partículas. El atributo 'position' 
+			contiene una partícula por cada trío de números consecutivos (coordenadas 
+			de cada partícula): position="x1 y1 z1 x2 y2 z2 x3 y3 z3 ..." Los atributos 
+			'showObjetc' y 'drawMode' permiten ver las partícula. -->
+		<MechanicalObject template="Vec3d" name="Particle"
+			position="0 0 0 1 1 1 6 5 2" velocity="0 0 0" force="0 0 0"
+			externalForce="0 0 0" restScale="1" showObject="1" drawMode="1" />
+		<!--- @UniformMass : le da la misma masa a todas las partículas del MechanicalObject. -->
+		<UniformMass template="Vec3d" name="Mass" />
+		<!--- @FixedConstraint : hace que las partículas de los índices establecidos 
+			se mantengan en una posición fija (previene, por ejemplo, que la gravedad 
+			haga que se muevan). -->
+		<FixedConstraint template="Vec3d" name="fixedConstraint"
+			indices="0" />
+		<!--- @StiffSpringForceField : Une dos objetos con un muelle. 'spring': 
+			el primer y segundo parámetros son los índices de los objetos afectados. 
+			Los dos siguientes son las propiedades físicas del muelle. 'object1' y 'object2': 
+			las rutas en la jerarquía de nodos de los objetos unidos por este muelle. 
+			'drawMode': si queremos que se represente este campo de fuerza ("muelle"). -->
+		<StiffSpringForceField template="Vec3d"
+			name="InternalSprings1.1" spring="0 1 30 3 1" object1="@./" object2="@./"
+			drawMode="1" />
+		<StiffSpringForceField template="Vec3d"
+			name="InternalSprings1.2" spring="1 2 20 5 1" object1="@./" object2="@./"
+			drawMode="1" />
+	</Node>
+	<Node name="SecondObject">
+		<MechanicalObject template="Vec3d" name="Particle2"
+			position="2 2 2 3 3 3" velocity="0 0 0" force="0 0 0" externalForce="0 0 0"
+			derivX="0 0 0" restScale="1" showObject="1" drawMode="1" />
+		<UniformMass template="Vec3d" name="Mass" />
+		<FixedConstraint template="Vec3d" name="fixedConstraint"
+			indices="1" />
+		<VisualStyle name="visualStyle1" displayFlags="showBehavior" />
+		<StiffSpringForceField template="Vec3d"
+			name="InternalSprings2.1" spring="0 1 30 3 1" object1="@./" object2="@./"
+			drawMode="1" />
+	</Node>
+	<!--- MUELLE EXTERNO -->
+	<StiffSpringForceField template="Vec3d"
+		name="ExternalSprings0.1" spring="1 0 10 0.01 1" drawMode="1"
+		object1="@FirstObject" object2="@SecondObject" />
+</Node>
